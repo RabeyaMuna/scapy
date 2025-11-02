@@ -708,7 +708,7 @@ class Dot11(Packet):
             [
                 (
                     FlagsField("FCfield", 0, 4,
-                               ["pw-mgt", "MD", "protected", "order"]),
+                               ["pw_mgt", "MD", "protected", "order"]),
                     lambda pkt: (pkt.type, pkt.subtype) == (1, 6)
                 ),
                 (
@@ -718,8 +718,8 @@ class Dot11(Packet):
                 )
             ],
             FlagsField("FCfield", 0, 8,
-                       ["to-DS", "from-DS", "MF", "retry",
-                        "pw-mgt", "MD", "protected", "order"])
+                       ["to_DS", "from_DS", "MF", "retry",
+                        "pw_mgt", "MD", "protected", "order"])
         ),
         ConditionalField(
             BitField("FCfield_bw", 0, 3),
@@ -746,7 +746,7 @@ class Dot11(Packet):
         ConditionalField(
             _Dot11MacField("addr4", ETHER_ANY, 4),
             lambda pkt: (pkt.type == 2 and
-                         pkt.FCfield & 3 == 3),  # from-DS+to-DS
+                         pkt.FCfield & 3 == 3),  # from_DS+to_DS
         )
     ]
 
