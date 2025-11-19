@@ -34,13 +34,14 @@ from scapy.utils import tex_escape
 
 # Check UTF-8 support #
 
+
 def _utf8_support():
     """
     Check UTF-8 support for the output
     """
     try:
         if WINDOWS:
-            return (sys.stdout.encoding == "utf-8")
+            return sys.stdout.encoding == "utf-8"
         return True
     except AttributeError:
         return False
@@ -58,8 +59,9 @@ else:
 
 #   Util class   #
 
+
 class Bunch:
-    __init__ = lambda self, **kw: setattr(self, '__dict__', kw)
+    __init__ = lambda self, **kw: setattr(self, "__dict__", kw)
 
 
 def retry_test(func):
@@ -79,15 +81,14 @@ def retry_test(func):
 
 def scapy_path(fname):
     """Resolves a path relative to scapy's root folder"""
-    if fname.startswith('/'):
+    if fname.startswith("/"):
         fname = fname[1:]
-    return os.path.abspath(os.path.join(
-        os.path.dirname(__file__), '../../', fname
-    ))
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "../../", fname))
 
 
 class no_debug_dissector:
     """Context object used to disable conf.debug_dissector"""
+
     def __init__(self, reverse=False):
         self.new_value = reverse
 
@@ -113,6 +114,7 @@ def import_module(name):
 
 #    INTERNAL/EXTERNAL FILE EMBEDDING    #
 
+
 class File:
     def __init__(self, name, URL, local):
         self.name = name
@@ -135,8 +137,10 @@ class File:
 # Embed a base64 encoded bziped version of js and css files
 # to work if you can't reach Internet.
 class External_Files:
-    UTscapy_js = File("UTscapy.js", "https://scapy.net/files/UTscapy/UTscapy.js",  # noqa: E501
-                      """QlpoOTFBWSZTWWVijKQAAXxfgERUYOvAChIhBAC
+    UTscapy_js = File(
+        "UTscapy.js",
+        "https://scapy.net/files/UTscapy/UTscapy.js",  # noqa: E501
+        """QlpoOTFBWSZTWWVijKQAAXxfgERUYOvAChIhBAC
 /79+qQAH8AFA0poANAMjQAAAGABo0NGEZNBo0\n0BhgAaNDRhGTQaNNAYFURJinp
 lGaKbRkJiekzSenqmpA0Gm1LFMpRUklVQlK9WUTZYpNFI1IiEWE\nFT09Sfj5uO+
 qO6S5DQwKIxM92+Zku94wL6V/1KTKan2c66Ug6SmVKy1ZIrgauxMVLF5xLH0lJRQ
@@ -145,9 +149,12 @@ siPj73m0rnvQ3QX\nZ9BJQiZQYQ5/uNcl2WOlC5vyQqV/BWsnr2NZYLYXQLDs/Bf
 fk4ZfR4/SH6GfA5Xlek4xHNHqbSsR\nbREOgueXo3kcYi94K6hSO3ldD2O/qJXOF
 qJ8o3TE2aQahxtQpCVUKQMvODHwu2YkaORYZC6gihEa\nllcHDIAtRPScBACAJnU
 ggYhLDX6DEko7nC9GvAw5OcEkiyDUbLdiGCzDaXWMC2DuQ2Y6sGf6NcRu\nON7QS
-bhHsPc4KKmZ/xdyRThQkGVijKQ=\n""")
-    UTscapy_css = File("UTscapy.css", "https://scapy.net/files/UTscapy/UTscapy.css",  # noqa: E501
-                       """QlpoOTFBWSZTWbpATIwAAFpfgHwQSB//+Cpj2Q
+bhHsPc4KKmZ/xdyRThQkGVijKQ=\n""",
+    )
+    UTscapy_css = File(
+        "UTscapy.css",
+        "https://scapy.net/files/UTscapy/UTscapy.css",  # noqa: E501
+        """QlpoOTFBWSZTWbpATIwAAFpfgHwQSB//+Cpj2Q
 C//9/6UAS5t7qcLut3NNDp0gxKMmpqaep6n6iP\n1J+pPU0yAAaeoaDI0BJCTJqa
 j1BoaGhoAAPSAAAJNSRqmmk8TQmj1DT1Hom1HkQABoNDmmJgATAB\nMAAJgACYJI
 hDQUzCR5Q0niRoaAGgGmZS+faw7LNbkliDG1Q52WJCd85cxRVVKegld8qCRISoto
@@ -170,24 +177,27 @@ ki1ZgOQDXQ7aIDTdjGRTgnzPML0V1X+tIoSSZmZhrxZbluMWGEkwwky6\n0ObWIM
 cEbX4cawPPBVc6m5UUPbEmBANyjtNvTKE2ri7oOmBVKIMLqQKm+4rlmisu2uGSxW
 zTov5w\nqQDp61FkHk40wzQUKk4YcBlbQT1l8VXeZJYAVFjSJIcC8JykBYZJ1yka
 I4LDm5WP7s2NaRkhhV7A\nFVSD5zA8V/DJzfTk0QHmCT2wRgwPKjP60EqqlDUaST
-/i7kinChIXSAmRgA==\n""")
+/i7kinChIXSAmRgA==\n""",
+    )
 
     def get_local_dict(cls):
-        return {x: y.name for (x, y) in cls.__dict__.items()
-                if isinstance(y, File)}
+        return {x: y.name for (x, y) in cls.__dict__.items() if isinstance(y, File)}
+
     get_local_dict = classmethod(get_local_dict)
 
     def get_URL_dict(cls):
-        return {x: y.URL for (x, y) in cls.__dict__.items()
-                if isinstance(y, File)}
+        return {x: y.URL for (x, y) in cls.__dict__.items() if isinstance(y, File)}
+
     get_URL_dict = classmethod(get_URL_dict)
 
 
 #    HELPER CLASSES FOR PARAMETRING OUTPUT FORMAT    #
 
+
 class EnumClass:
     def from_string(cls, x):
         return cls.__dict__[x.upper()]
+
     from_string = classmethod(from_string)
 
 
@@ -202,6 +212,7 @@ class Format(EnumClass):
 
 #    TEST CLASSES    #
 
+
 class TestClass:
     def __getitem__(self, item):
         return getattr(self, item)
@@ -211,7 +222,7 @@ class TestClass:
             kws = [kws.lower()]
         for kwd in kws:
             kwd = kwd.lower()
-            if kwd.startswith('-'):
+            if kwd.startswith("-"):
                 try:
                     self.keywords.remove(kwd[1:])
                 except KeyError:
@@ -301,6 +312,7 @@ class UnitTest(TestClass):
 
     def __nonzero__(self):
         return self.result == "passed"
+
     __bool__ = __nonzero__
 
 
@@ -336,22 +348,27 @@ def parse_config_file(config_path, verb=3):
 
     def get_if_exist(key, default):
         return data[key] if key in data else default
-    return Bunch(testfiles=get_if_exist("testfiles", []),
-                 breakfailed=get_if_exist("breakfailed", True),
-                 remove_testfiles=get_if_exist("remove_testfiles", []),
-                 onlyfailed=get_if_exist("onlyfailed", False),
-                 verb=get_if_exist("verb", 3),
-                 dump=get_if_exist("dump", 0), crc=get_if_exist("crc", 1),
-                 docs=get_if_exist("docs", 0),
-                 preexec=get_if_exist("preexec", {}),
-                 global_preexec=get_if_exist("global_preexec", ""),
-                 outfile=get_if_exist("outputfile", sys.stdout),
-                 local=get_if_exist("local", False),
-                 num=get_if_exist("num", None),
-                 modules=get_if_exist("modules", []),
-                 kw_ok=get_if_exist("kw_ok", []),
-                 kw_ko=get_if_exist("kw_ko", []),
-                 format=get_if_exist("format", "ansi"))
+
+    return Bunch(
+        testfiles=get_if_exist("testfiles", []),
+        breakfailed=get_if_exist("breakfailed", True),
+        remove_testfiles=get_if_exist("remove_testfiles", []),
+        onlyfailed=get_if_exist("onlyfailed", False),
+        verb=get_if_exist("verb", 3),
+        dump=get_if_exist("dump", 0),
+        crc=get_if_exist("crc", 1),
+        docs=get_if_exist("docs", 0),
+        preexec=get_if_exist("preexec", {}),
+        global_preexec=get_if_exist("global_preexec", ""),
+        outfile=get_if_exist("outputfile", sys.stdout),
+        local=get_if_exist("local", False),
+        num=get_if_exist("num", None),
+        modules=get_if_exist("modules", []),
+        kw_ok=get_if_exist("kw_ok", []),
+        kw_ko=get_if_exist("kw_ko", []),
+        format=get_if_exist("format", "ansi"),
+    )
+
 
 #    PARSE CAMPAIGN    #
 
@@ -364,7 +381,7 @@ def parse_campaign_file(campaign_file):
     testnb = 0
 
     for line in campaign_file.readlines():
-        if line[0] == '#':
+        if line[0] == "#":
             continue
         if line[0] == "~":
             (test or testset or test_campaign).add_keywords(line[1:].split())
@@ -408,7 +425,10 @@ def dump_campaign(test_campaign):
     print()
     for ts in test_campaign:
         if ts.crc:
-            print("+--[%s]%s(%s)--" % (ts.name, "-" * max(2, 80 - len(ts.name) - 18), ts.crc))  # noqa: E501
+            print(
+                "+--[%s]%s(%s)--"
+                % (ts.name, "-" * max(2, 80 - len(ts.name) - 18), ts.crc)
+            )  # noqa: E501
         else:
             print("+--[%s]%s" % (ts.name, "-" * max(2, 80 - len(ts.name) - 6)))
         if ts.keywords:
@@ -446,14 +466,14 @@ def docs_campaign(test_campaign):
                 print("%s" % t.comments.strip().replace("\n", ""))
                 print()
             print("Usage example::")
-            for line in t.test.split('\n'):
-                if not line.rstrip().endswith('# no_docs'):
+            for line in t.test.split("\n"):
+                if not line.rstrip().endswith("# no_docs"):
                     print("\t%s" % line)
 
 
 #    COMPUTE CAMPAIGN DIGESTS    #
 def crc32(x):
-    return "%08X" % (0xffffffff & zlib.crc32(bytearray(x, "utf8")))
+    return "%08X" % (0xFFFFFFFF & zlib.crc32(bytearray(x, "utf8")))
 
 
 def sha1(x):
@@ -477,12 +497,12 @@ def compute_campaign_digests(test_campaign):
 
 #    FILTER CAMPAIGN     #
 
+
 def filter_tests_on_numbers(test_campaign, num):
     if num:
         for ts in test_campaign:
             ts.tests = [t for t in ts.tests if t.num in num]
-        test_campaign.campaign = [ts for ts in test_campaign.campaign
-                                  if ts.tests]
+        test_campaign.campaign = [ts for ts in test_campaign.campaign if ts.tests]
 
 
 def _filter_tests_kw(test_campaign, kw, keep):
@@ -513,41 +533,56 @@ def remove_empty_testsets(test_campaign):
 
 # RUN TEST #
 
+
 def _run_test_timeout(test, get_interactive_session, verb=3, my_globals=None):
     """Run a test with timeout"""
     from scapy.autorun import StopAutorunTimeout
+
     try:
-        return get_interactive_session(test,
-                                       timeout=5 * 60,  # 5 min
-                                       verb=verb,
-                                       my_globals=my_globals)
+        return get_interactive_session(
+            test,
+            timeout=5 * 60,  # 5 min
+            verb=verb,
+            my_globals=my_globals,
+        )
     except StopAutorunTimeout:
         return "-- Test timed out ! --", False
 
 
-def run_test(test, get_interactive_session, theme, verb=3,
-             my_globals=None):
+def run_test(test, get_interactive_session, theme, verb=3, my_globals=None):
     """An internal UTScapy function to run a single test"""
     start_time = time.time()
-    test.output, res = _run_test_timeout(test.test.strip(), get_interactive_session, verb=verb, my_globals=my_globals)
+    test.output, res = _run_test_timeout(
+        test.test.strip(), get_interactive_session, verb=verb, my_globals=my_globals
+    )
     test.result = "failed"
     try:
         if res is None or res:
             test.result = "passed"
-        if test.output.endswith('KeyboardInterrupt\n'):
+        if test.output.endswith("KeyboardInterrupt\n"):
             test.result = "interrupted"
             raise KeyboardInterrupt
     except Exception:
         test.output += "UTscapy: Error during result interpretation:\n"
-        test.output += "".join(traceback.format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2],))
+        test.output += "".join(
+            traceback.format_exception(
+                sys.exc_info()[0],
+                sys.exc_info()[1],
+                sys.exc_info()[2],
+            )
+        )
     finally:
         test.duration = time.time() - start_time
         if test.result == "failed":
             from scapy.sendrecv import debug
+
             # Add optional debugging data to log
             if debug.crashed_on:
                 cls, val = debug.crashed_on
-                test.output += "\n\nPACKET DISSECTION FAILED ON:\n %s(bytes.fromhex('%s'))" % (cls.__name__, val.hex())
+                test.output += (
+                    "\n\nPACKET DISSECTION FAILED ON:\n %s(bytes.fromhex('%s'))"
+                    % (cls.__name__, val.hex())
+                )
                 debug.crashed_on = None
         test.prepare(theme)
         if verb > 2:
@@ -556,6 +591,7 @@ def run_test(test, get_interactive_session, theme, verb=3,
             print("%(fresult)6s %(crc)s %(name)s" % test)
 
     return bool(test)
+
 
 # RUN CAMPAIGN #
 
@@ -568,25 +604,31 @@ def import_UTscapy_tools(ses):
     ses["no_debug_dissector"] = no_debug_dissector
     if WINDOWS:
         from scapy.arch.windows import _route_add_loopback
+
         _route_add_loopback()
         ses["conf"].ifaces = conf.ifaces
         ses["conf"].route.routes = conf.route.routes
         ses["conf"].route6.routes = conf.route6.routes
 
 
-def run_campaign(test_campaign, get_interactive_session, theme,
-                 drop_to_interpreter=False, verb=3,
-                 scapy_ses=None):
+def run_campaign(
+    test_campaign,
+    get_interactive_session,
+    theme,
+    drop_to_interpreter=False,
+    verb=3,
+    scapy_ses=None,
+):
     passed = failed = 0
     if test_campaign.preexec:
         test_campaign.preexec_output = get_interactive_session(
-            test_campaign.preexec.strip(),
-            my_globals=scapy_ses
+            test_campaign.preexec.strip(), my_globals=scapy_ses
         )[0]
 
     # Drop
     def drop(t, scapy_ses):
         from scapy.main import interact
+
         interact(
             mybanner="Test '%s' failed.\n\n%s" % (t.name, t.output),
             mybanneronly=True,
@@ -597,8 +639,9 @@ def run_campaign(test_campaign, get_interactive_session, theme,
     try:
         for i, testset in enumerate(test_campaign):
             for j, t in enumerate(testset):
-                if run_test(t, get_interactive_session, theme,
-                            verb=verb, my_globals=scapy_ses):
+                if run_test(
+                    t, get_interactive_session, theme, verb=verb, my_globals=scapy_ses
+                ):
                     passed += 1
                 else:
                     failed += 1
@@ -627,6 +670,7 @@ def run_campaign(test_campaign, get_interactive_session, theme,
 
 #    INFO LINES    #
 
+
 def info_line(test_campaign, theme):
     filename = test_campaign.filename
     duration = test_campaign.duration
@@ -635,24 +679,27 @@ def info_line(test_campaign, theme):
     elif duration > 5:
         duration = theme.format(duration, "red")
     if filename is None:
-        return "Run at %s by UTscapy in %s" % (
-            time.strftime("%H:%M:%S"),
-            duration
-        )
+        return "Run at %s by UTscapy in %s" % (time.strftime("%H:%M:%S"), duration)
     else:
         return "Run at %s from [%s] by UTscapy in %s" % (
             time.strftime("%H:%M:%S"),
             filename,
-            duration
+            duration,
         )
 
 
 def html_info_line(test_campaign):
     filename = test_campaign.filename
     if filename is None:
-        return """Run %s by <a href="http://www.secdev.org/projects/UTscapy/">UTscapy</a><br>""" % time.ctime()  # noqa: E501
+        return (
+            """Run %s by <a href="http://www.secdev.org/projects/UTscapy/">UTscapy</a><br>"""
+            % time.ctime()
+        )  # noqa: E501
     else:
-        return """Run %s from [%s] by <a href="http://www.secdev.org/projects/UTscapy/">UTscapy</a><br>""" % (time.ctime(), filename)  # noqa: E501
+        return (
+            """Run %s from [%s] by <a href="http://www.secdev.org/projects/UTscapy/">UTscapy</a><br>"""
+            % (time.ctime(), filename)
+        )  # noqa: E501
 
 
 def latex_info_line(test_campaign):
@@ -664,6 +711,7 @@ def latex_info_line(test_campaign):
 
 
 #    CAMPAIGN TO something    #
+
 
 def campaign_to_TEXT(test_campaign, theme):
     ptheme = [lambda x: x, theme.success][bool(test_campaign.passed)]
@@ -680,7 +728,10 @@ def campaign_to_TEXT(test_campaign, theme):
             output += "######\n## %(name)s\n######\n%(comments)s\n\n" % testset
             for t in testset:
                 if t.expand:
-                    output += "###(%(num)03i)=[%(result)s] %(name)s\n%(comments)s\n%(output)s\n\n" % t  # noqa: E501
+                    output += (
+                        "###(%(num)03i)=[%(result)s] %(name)s\n%(comments)s\n%(output)s\n\n"
+                        % t
+                    )  # noqa: E501
 
     return output
 
@@ -693,33 +744,43 @@ def campaign_to_xUNIT(test_campaign):
     output = '<?xml version="1.0" encoding="UTF-8" ?>\n<testsuite>\n'
     for testset in test_campaign:
         for t in testset:
-            output += ' <testcase classname="%s"\n' % testset.name.replace('"', ' ')  # noqa: E501
-            output += '           name="%s"\n' % t.name.replace('"', ' ')  # noqa: E501
+            output += ' <testcase classname="%s"\n' % testset.name.replace('"', " ")  # noqa: E501
+            output += '           name="%s"\n' % t.name.replace('"', " ")  # noqa: E501
             output += '           duration="0">\n' % t
             if not t:
-                output += '<error><![CDATA[%(output)s]]></error>\n' % t
+                output += "<error><![CDATA[%(output)s]]></error>\n" % t
             output += "</testcase>\n"
-    output += '</testsuite>'
+    output += "</testsuite>"
     return output
 
 
 def campaign_to_HTML(test_campaign):
-    output = """
+    output = (
+        """
 <h1>%(title)s</h1>
 
 <p>
-""" % test_campaign
+"""
+        % test_campaign
+    )
 
     if test_campaign.crc is not None and test_campaign.sha is not None:
-        output += "CRC=<span class=crc>%(crc)s</span> SHA=<span class=crc>%(sha)s</span><br>" % test_campaign
+        output += (
+            "CRC=<span class=crc>%(crc)s</span> SHA=<span class=crc>%(sha)s</span><br>"
+            % test_campaign
+        )
     output += "<small><em>" + html_info_line(test_campaign) + "</em></small>"
-    output += "".join([
-        test_campaign.headcomments,
-        "\n<p>",
-        "PASSED=%(passed)i FAILED=%(failed)i" % test_campaign,
-        " <span class=warn_interrupted>INTERRUPTED!</span>" if test_campaign.interrupted else "",
-        "<p>\n\n",
-    ])
+    output += "".join(
+        [
+            test_campaign.headcomments,
+            "\n<p>",
+            "PASSED=%(passed)i FAILED=%(failed)i" % test_campaign,
+            " <span class=warn_interrupted>INTERRUPTED!</span>"
+            if test_campaign.interrupted
+            else "",
+            "<p>\n\n",
+        ]
+    )
 
     for testset in test_campaign:
         output += "<h2>" % testset
@@ -729,24 +790,35 @@ def campaign_to_HTML(test_campaign):
         for t in testset:
             output += """<li class=%(result)s id="tst%(num)il">\n""" % t
             if t.expand == 2:
-                output += """
+                output += (
+                    """
 <span id="tst%(num)i+" class="button%(result)s" onClick="show('tst%(num)i')" style="POSITION: absolute; VISIBILITY: hidden;">+%(num)03i+</span>
 <span id="tst%(num)i-" class="button%(result)s" onClick="hide('tst%(num)i')">-%(num)03i-</span>
-""" % t
+"""
+                    % t
+                )
             else:
-                output += """
+                output += (
+                    """
 <span id="tst%(num)i+" class="button%(result)s" onClick="show('tst%(num)i')">+%(num)03i+</span>
 <span id="tst%(num)i-" class="button%(result)s" onClick="hide('tst%(num)i')" style="POSITION: absolute; VISIBILITY: hidden;">-%(num)03i-</span>
-""" % t
+"""
+                    % t
+                )
             if t.crc is not None:
                 output += "<span class=crc>%(crc)s</span>\n" % t
-            output += """%(name)s\n<span class="comment %(result)s" id="tst%(num)i" """ % t  # noqa: E501
+            output += (
+                """%(name)s\n<span class="comment %(result)s" id="tst%(num)i" """ % t
+            )  # noqa: E501
             if t.expand < 2:
                 output += """ style="POSITION: absolute; VISIBILITY: hidden;" """  # noqa: E501
-            output += """><br>%(comments)s
+            output += (
+                """><br>%(comments)s
 <pre>
 %(output)s</pre></span>
-""" % t
+"""
+                % t
+            )
         output += "\n</ul>\n\n"
     return output
 
@@ -768,7 +840,10 @@ def pack_html_campaigns(runned_campaigns, data, local=False, title=None):
     for test_campaign in runned_campaigns:
         for ts in test_campaign:
             for t in ts:
-                output += """<span class=button%(result)s onClick="goto_id('tst%(num)il')">%(num)03i</span>\n""" % t
+                output += (
+                    """<span class=button%(result)s onClick="goto_id('tst%(num)il')">%(num)03i</span>\n"""
+                    % t
+                )
 
     output += """</p>\n\n
 <link rel="stylesheet" href="%(UTscapy_css)s" type="text/css">
@@ -778,7 +853,7 @@ def pack_html_campaigns(runned_campaigns, data, local=False, title=None):
 %(data)s
 </body></html>
 """
-    out_dict = {'data': data, 'title': title if title else "UTScapy tests"}
+    out_dict = {"data": data, "title": title if title else "UTScapy tests"}
     if local:
         dirname = os.path.dirname(test_campaign.output_file)
         External_Files.UTscapy_js.write(dirname)
@@ -792,7 +867,8 @@ def pack_html_campaigns(runned_campaigns, data, local=False, title=None):
 
 
 def campaign_to_LATEX(test_campaign):
-    output = r"""
+    output = (
+        r"""
 \chapter{%(title)s}
 Run %%s on \date{%%s}
 \begin{description}
@@ -802,7 +878,9 @@ Run %%s on \date{%%s}
 
 %(headcomments)s
 
-""" % test_campaign
+"""
+        % test_campaign
+    )
     output %= latex_info_line(test_campaign)
 
     for testset in test_campaign:
@@ -810,7 +888,8 @@ Run %%s on \date{%%s}
         for t in testset:
             t.comments = tex_escape(t.comments)
             if t.expand:
-                output += r"""\subsection{%(name)s}
+                output += (
+                    r"""\subsection{%(name)s}
 
 Test result: \textbf{%(result)s}\newline
 
@@ -819,7 +898,9 @@ Test result: \textbf{%(result)s}\newline
 %(output)s
 \end{alltt}
 
-""" % t
+"""
+                    % t
+                )
 
     return output
 
@@ -842,13 +923,14 @@ def pack_latex_campaigns(runned_campaigns, data, local=False, title=None):
 \end{document}\n
 """
 
-    out_dict = {'data': data, 'title': title if title else "UTScapy tests"}
+    out_dict = {"data": data, "title": title if title else "UTScapy tests"}
 
     output %= out_dict
     return output
 
 
 # USAGE #
+
 
 def usage():
     print("""Usage: UTscapy [-m module] [-f {text|ansi|HTML|LaTeX|xUnit|live}] [-o output_file]
@@ -881,17 +963,31 @@ def usage():
 
 #    MAIN    #
 
-def execute_campaign(TESTFILE, OUTPUTFILE, PREEXEC, NUM, KW_OK, KW_KO, DUMP, DOCS,
-                     FORMAT, VERB, ONLYFAILED, CRC, INTERPRETER,
-                     autorun_func, theme, pos_begin=0,
-                     scapy_ses=None):  # noqa: E501
+
+def execute_campaign(
+    TESTFILE,
+    OUTPUTFILE,
+    PREEXEC,
+    NUM,
+    KW_OK,
+    KW_KO,
+    DUMP,
+    DOCS,
+    FORMAT,
+    VERB,
+    ONLYFAILED,
+    CRC,
+    INTERPRETER,
+    autorun_func,
+    theme,
+    pos_begin=0,
+    scapy_ses=None,
+):  # noqa: E501
     # Parse test file
     try:
         test_campaign = parse_campaign_file(TESTFILE)
     except ValueError as ex:
-        print(
-            theme.red("Error while parsing '%s': '%s'" % (TESTFILE.name, ex))
-        )
+        print(theme.red("Error while parsing '%s': '%s'" % (TESTFILE.name, ex)))
         sys.exit(1)
 
     # Report parameters
@@ -925,10 +1021,12 @@ def execute_campaign(TESTFILE, OUTPUTFILE, PREEXEC, NUM, KW_OK, KW_KO, DUMP, DOC
     # Run tests
     test_campaign.output_file = OUTPUTFILE
     result = run_campaign(
-        test_campaign, autorun_func[FORMAT], theme,
+        test_campaign,
+        autorun_func[FORMAT],
+        theme,
         drop_to_interpreter=INTERPRETER,
         verb=VERB,
-        scapy_ses=scapy_ses
+        scapy_ses=scapy_ses,
     )
 
     # Shrink passed
@@ -974,9 +1072,11 @@ def main():
     warnings.filterwarnings("error", category=SyntaxWarning)
 
     import scapy
-    print(dash + " UTScapy - Scapy %s - %s" % (
-        scapy.__version__, sys.version.split(" ")[0]
-    ))
+
+    print(
+        dash
+        + " UTScapy - Scapy %s - %s" % (scapy.__version__, sys.version.split(" ")[0])
+    )
 
     # Parse arguments
 
@@ -1073,7 +1173,7 @@ def main():
                     try:
                         NUM.append(int(v))
                     except ValueError:
-                        v1, v2 = [int(e) for e in v.split('-', 1)]
+                        v1, v2 = [int(e) for e in v.split("-", 1)]
                         NUM.extend(range(v1, v2 + 1))
             elif opt == "-N":
                 NON_ROOT = True
@@ -1162,7 +1262,9 @@ def main():
             pycode = PREEXEC_DICT[prex]
             del PREEXEC_DICT[prex]
             for gl in glob.iglob(prex):
-                _pycode = pycode.replace("%name%", os.path.splitext(os.path.split(gl)[1])[0])  # noqa: E501
+                _pycode = pycode.replace(
+                    "%name%", os.path.splitext(os.path.split(gl)[1])[0]
+                )  # noqa: E501
                 PREEXEC_DICT[gl] = _pycode
 
     pos_begin = 0
@@ -1170,6 +1272,7 @@ def main():
     runned_campaigns = []
 
     from scapy.main import _scapy_builtins
+
     scapy_ses = _scapy_builtins()
     import_UTscapy_tools(scapy_ses)
 
@@ -1180,11 +1283,23 @@ def main():
         PREEXEC = PREEXEC_DICT[TESTFILE] if TESTFILE in PREEXEC_DICT else GLOB_PREEXEC
         with open(TESTFILE) as testfile:
             output, result, campaign = execute_campaign(
-                testfile, OUTPUTFILE, PREEXEC, NUM, KW_OK, KW_KO, DUMP, DOCS,
-                FORMAT, VERB, ONLYFAILED, CRC, INTERPRETER,
-                autorun_func, theme,
+                testfile,
+                OUTPUTFILE,
+                PREEXEC,
+                NUM,
+                KW_OK,
+                KW_KO,
+                DUMP,
+                DOCS,
+                FORMAT,
+                VERB,
+                ONLYFAILED,
+                CRC,
+                INTERPRETER,
+                autorun_func,
+                theme,
                 pos_begin=pos_begin,
-                scapy_ses=copy.copy(scapy_ses)
+                scapy_ses=copy.copy(scapy_ses),
             )
         runned_campaigns.append(campaign)
         pos_begin = campaign.end_pos
@@ -1197,9 +1312,7 @@ def main():
                 break
 
     if VERB > 2:
-        print(
-            checkmark + " All campaigns executed. Writing output..."
-        )
+        print(checkmark + " All campaigns executed. Writing output...")
 
     if ANNOTATIONS_MODE:
         collect_types.stop()
@@ -1207,9 +1320,13 @@ def main():
 
     # Concenate outputs
     if FORMAT == Format.HTML:
-        glob_output = pack_html_campaigns(runned_campaigns, glob_output, LOCAL, glob_title)
+        glob_output = pack_html_campaigns(
+            runned_campaigns, glob_output, LOCAL, glob_title
+        )
     if FORMAT == Format.LATEX:
-        glob_output = pack_latex_campaigns(runned_campaigns, glob_output, LOCAL, glob_title)
+        glob_output = pack_latex_campaigns(
+            runned_campaigns, glob_output, LOCAL, glob_title
+        )
 
     # Write the final output
     # Note: on Python 2, we force-encode to ignore ascii errors
@@ -1218,8 +1335,9 @@ def main():
         print(glob_output, file=OUTPUTFILE)
     else:
         with open(OUTPUTFILE, "wb") as f:
-            f.write(glob_output.encode("utf8", "ignore")
-                    if 'b' in f.mode else glob_output)
+            f.write(
+                glob_output.encode("utf8", "ignore") if "b" in f.mode else glob_output
+            )
 
     # Print end message
     if VERB > 2:
@@ -1234,6 +1352,7 @@ def main():
             print("\nWARNING: UNFINISHED THREADS")
             print(threading.enumerate())
         import multiprocessing
+
         processes = multiprocessing.active_children()
         if processes:
             print("\nWARNING: UNFINISHED PROCESSES")
@@ -1250,7 +1369,7 @@ if __name__ == "__main__":
         with warnings.catch_warnings(record=True) as cw:
             warnings.resetwarnings()
             # Let's discover the garbage waste
-            warnings.simplefilter('error')
+            warnings.simplefilter("error")
             print("### Warning mode enabled ###")
             res = main()
             if cw:
