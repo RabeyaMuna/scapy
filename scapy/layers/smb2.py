@@ -78,7 +78,6 @@ from scapy.layers.ntlm import (
     _NTLM_post_build,
 )
 
-
 # EnumField
 SMB_DIALECTS = {
     0x0202: "SMB 2.002",
