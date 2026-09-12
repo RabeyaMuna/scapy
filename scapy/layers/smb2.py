@@ -21,29 +21,28 @@ import struct
 from scapy.automaton import select_objects
 from scapy.config import conf, crypto_validator
 from scapy.error import log_runtime
-from scapy.packet import Packet, bind_layers, bind_top_down
 from scapy.fields import (
     ByteEnumField,
     ByteField,
     ConditionalField,
     FieldLenField,
     FieldListField,
-    FlagValue,
     FlagsField,
+    FlagValue,
+    IntField,
     IP6Field,
     IPField,
-    IntField,
-    LEIntField,
     LEIntEnumField,
+    LEIntField,
     LELongField,
     LenField,
     LEShortEnumField,
     LEShortField,
     MultipleTypeField,
-    PadField,
     PacketField,
     PacketLenField,
     PacketListField,
+    PadField,
     ReversePadField,
     ScalingField,
     ShortEnumField,
@@ -59,10 +58,11 @@ from scapy.fields import (
     XLEIntField,
     XLELongField,
     XLEShortField,
-    XStrLenField,
     XStrFixedLenField,
+    XStrLenField,
     YesNoByteField,
 )
+from scapy.packet import Packet, bind_layers, bind_top_down
 from scapy.sessions import DefaultSession
 from scapy.supersocket import StreamSocket
 
@@ -72,12 +72,11 @@ if conf.crypto_valid:
 from scapy.layers.gssapi import GSSAPI_BLOB
 from scapy.layers.netbios import NBTSession
 from scapy.layers.ntlm import (
-    _NTLMPayloadField,
-    _NTLMPayloadPacket,
     _NTLM_ENUM,
     _NTLM_post_build,
+    _NTLMPayloadField,
+    _NTLMPayloadPacket,
 )
-
 
 # EnumField
 SMB_DIALECTS = {
@@ -1510,7 +1509,9 @@ class WINNT_ACL(Packet):
             None,
             length_of="Aces",
             adjust=lambda _, x: x + 8,
-            fmt="<H",  # total size including header : AclRevision(1) + Sbz1(1) + AclSize(2) + AceCount(2) + Sbz2(2)
+            # total size including header:
+            # AclRevision(1) + Sbz1(1) + AclSize(2) + AceCount(2) + Sbz2(2)
+            fmt="<H",
         ),
         FieldLenField("AceCount", None, count_of="Aces", fmt="<H"),
         ShortField("Sbz2", 0),
