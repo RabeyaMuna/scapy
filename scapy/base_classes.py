@@ -11,8 +11,6 @@ Generators and packet meta classes.
 #  Generators  #
 ################
 
-
-from functools import reduce
 import abc
 import operator
 import os
@@ -23,25 +21,19 @@ import struct
 import subprocess
 import types
 import warnings
-
-import scapy
-from scapy.error import Scapy_Exception
-from scapy.consts import WINDOWS
-
+from functools import reduce
 from typing import (
+    TYPE_CHECKING,
     Any,
-    Dict,
     Generic,
-    Iterator,
-    List,
     Optional,
-    Tuple,
     Type,
     TypeVar,
-    Union,
     cast,
-    TYPE_CHECKING,
 )
+
+from scapy.consts import WINDOWS
+from scapy.error import Scapy_Exception
 
 if TYPE_CHECKING:
     try:
@@ -71,12 +63,16 @@ def _get_values(value):
     return value.
 
     """
-    if (isinstance(value, tuple) and (2 <= len(value) <= 3) and
-            all(hasattr(i, "__int__") for i in value)):
+    if (
+        isinstance(value, tuple)
+        and (2 <= len(value) <= 3)
+        and all(hasattr(i, "__int__") for i in value)
+    ):
         # We use values[1] + 1 as stop value for (x)range to maintain
         # the behavior of using tuples as field `values`
-        return range(*((int(value[0]), int(value[1]) + 1) +
-                       tuple(int(v) for v in value[2:])))
+        return range(
+            *((int(value[0]), int(value[1]) + 1) + tuple(int(v) for v in value[2:]))
+        )
     return value
 
 
@@ -92,9 +88,10 @@ class SetGen(Gen[_T]):
     def __iter__(self):
         # type: () -> Iterator[Any]
         for i in self.values:
-            if (isinstance(i, Gen) and
-                (self._iterpacket or not isinstance(i, BasePacket))) or (
-                    isinstance(i, (range, types.GeneratorType))):
+            if (
+                isinstance(i, Gen)
+                and (self._iterpacket or not isinstance(i, BasePacket))
+            ) or (isinstance(i, (range, types.GeneratorType))):
                 for j in i:
                     yield j
             else:
@@ -113,6 +110,7 @@ class _ScopedIP(str):
     """
     A str that also holds extra attributes.
     """
+
     __slots__ = ["scope"]
 
     def __init__(self, _: str) -> None:
@@ -141,7 +139,8 @@ def ScopedIP(net: str, scope: Optional[Any] = None) -> _ScopedIP:
         except ValueError:
             raise Scapy_Exception("Scope identifier can only be present once !")
     if scope is not None:
-        from scapy.interfaces import resolve_iface, network_name, dev_from_index
+        from scapy.interfaces import dev_from_index, network_name, resolve_iface
+
         try:
             iface = dev_from_index(int(scope))
         except (ValueError, TypeError):
@@ -178,6 +177,7 @@ class Net(Gen[str]):
             >>> Net("224.0.0.1%lo")
             >>> Net("224.0.0.1", scope=conf.iface)
     """
+
     name = "Net"  # type: str
     family = socket.AF_INET  # type: int
     max_mask = 32  # type: int
@@ -188,33 +188,34 @@ class Net(Gen[str]):
         try:
             return next(
                 addr_port[0]
-                for family, _, _, _, addr_port in
-                socket.getaddrinfo(name, None, cls.family)
+                for family, _, _, _, addr_port in socket.getaddrinfo(
+                    name, None, cls.family
+                )
                 if family == cls.family
             )
         except socket.error:
             if re.search("(^|\\.)[0-9]+-[0-9]+($|\\.)", name) is not None:
-                raise Scapy_Exception("Ranges are no longer accepted in %s()" %
-                                      cls.__name__)
+                raise Scapy_Exception(
+                    "Ranges are no longer accepted in %s()" % cls.__name__
+                )
             raise
 
     @classmethod
     def ip2int(cls, addr):
         # type: (str) -> int
-        return cast(int, struct.unpack(
-            "!I", socket.inet_aton(cls.name2addr(addr))
-        )[0])
+        return cast(int, struct.unpack("!I", socket.inet_aton(cls.name2addr(addr)))[0])
 
     @staticmethod
     def int2ip(val):
         # type: (int) -> str
-        return socket.inet_ntoa(struct.pack('!I', val))
+        return socket.inet_ntoa(struct.pack("!I", val))
 
     def __init__(self, net, stop=None, scope=None):
         # type: (str, Optional[str], Optional[str]) -> None
         if "*" in net:
-            raise Scapy_Exception("Wildcards are no longer accepted in %s()" %
-                                  self.__class__.__name__)
+            raise Scapy_Exception(
+                "Wildcards are no longer accepted in %s()" % self.__class__.__name__
+            )
         self.scope = None
         if "%" in net:
             net = ScopedIP(net)
@@ -361,14 +362,18 @@ class OID(Gen[str]):
 #  Packet abstract and base classes  #
 ######################################
 
+
 class Packet_metaclass(type):
-    def __new__(cls: Type[_T],
-                name,  # type: str
-                bases,  # type: Tuple[type, ...]
-                dct  # type: Dict[str, Any]
-                ):
+    def __new__(
+        cls: Type[_T],
+        name,  # type: str
+        bases,  # type: Tuple[type, ...]
+        dct,  # type: Dict[str, Any]
+    ):
         # type: (...) -> Type['Packet']
-        if "fields_desc" in dct:  # perform resolution of references to other packets  # noqa: E501
+        if (
+            "fields_desc" in dct
+        ):  # perform resolution of references to other packets  # noqa: E501
             current_fld = dct["fields_desc"]  # type: List[Union[scapy.fields.Field[Any, Any], Packet_metaclass]]  # noqa: E501
             resolved_fld = []  # type: List[scapy.fields.Field[Any, Any]]
             for fld_or_pkt in current_fld:
@@ -395,9 +400,7 @@ class Packet_metaclass(type):
                         "If you are using several ConditionalFields, have "
                         "a look at MultipleTypeField instead ! This will "
                         "become a SyntaxError in a future version of "
-                        "Scapy !" % (
-                            name, f.name
-                        )
+                        "Scapy !" % (name, f.name)
                     )
                     warnings.warn(war_msg, SyntaxWarning)
                 names.append(f.name)
@@ -419,22 +422,27 @@ class Packet_metaclass(type):
         try:
             # Py3 only
             import inspect
-            dct["__signature__"] = inspect.Signature([
-                inspect.Parameter("_pkt", inspect.Parameter.POSITIONAL_ONLY),
-            ] + [
-                inspect.Parameter(f.name,
-                                  inspect.Parameter.KEYWORD_ONLY,
-                                  default=f.default)
-                for f in dct["fields_desc"]
-            ])
+
+            dct["__signature__"] = inspect.Signature(
+                [
+                    inspect.Parameter("_pkt", inspect.Parameter.POSITIONAL_ONLY),
+                ]
+                + [
+                    inspect.Parameter(
+                        f.name, inspect.Parameter.KEYWORD_ONLY, default=f.default
+                    )
+                    for f in dct["fields_desc"]
+                ]
+            )
         except (ImportError, AttributeError, KeyError):
             pass
-        newcls = cast(Type['Packet'], type.__new__(cls, name, bases, dct))
+        newcls = cast(Type["Packet"], type.__new__(cls, name, bases, dct))
         # Note: below can't be typed because we use attributes
         # created dynamically..
         newcls.__all_slots__ = set(  # type: ignore
             attr
-            for cls in newcls.__mro__ if hasattr(cls, "__slots__")
+            for cls in newcls.__mro__
+            if hasattr(cls, "__slots__")
             for attr in cls.__slots__
         )
 
@@ -449,6 +457,7 @@ class Packet_metaclass(type):
                 _f.register_owner(newcls)
         if newcls.__name__[0] != "_":
             from scapy import config
+
             config.conf.layers.register(newcls)
         return newcls
 
@@ -459,16 +468,18 @@ class Packet_metaclass(type):
                 return k
         raise AttributeError(attr)
 
-    def __call__(cls,
-                 *args,  # type: Any
-                 **kargs  # type: Any
-                 ):
+    def __call__(
+        cls,
+        *args,  # type: Any
+        **kargs,  # type: Any
+    ):
         # type: (...) -> 'Packet'
         if "dispatch_hook" in cls.__dict__:
             try:
                 cls = cls.dispatch_hook(*args, **kargs)
             except Exception:
                 from scapy import config
+
                 if config.conf.debug_dissector:
                     raise
                 cls = config.conf.raw_layer
@@ -476,20 +487,27 @@ class Packet_metaclass(type):
             cls,  # type: ignore
             cls.__name__,
             cls.__bases__,
-            cls.__dict__  # type: ignore
+            cls.__dict__,  # type: ignore
         )
-        i.__init__(*args, **kargs)
+        from scapy.error import Scapy_Exception
+
+        try:
+            i.__init__(*args, **kargs)
+        except ValueError as e:
+            raise Scapy_Exception("Packet initialization failed: %s" % e) from e
         return i  # type: ignore
 
 
 # Note: see compat.py for an explanation
 
+
 class Field_metaclass(type):
-    def __new__(cls: Type[_T],
-                name,  # type: str
-                bases,  # type: Tuple[type, ...]
-                dct  # type: Dict[str, Any]
-                ):
+    def __new__(
+        cls: Type[_T],
+        name,  # type: str
+        bases,  # type: Tuple[type, ...]
+        dct,  # type: Dict[str, Any]
+    ):
         # type: (...) -> Type[_T]
         dct.setdefault("__slots__", [])
         newcls = type.__new__(cls, name, bases, dct)
@@ -499,13 +517,14 @@ class Field_metaclass(type):
 PacketList_metaclass = Field_metaclass
 
 
-class BasePacket(Gen['Packet']):
+class BasePacket(Gen["Packet"]):
     __slots__ = []  # type: List[str]
 
 
 #############################
 #  Packet list base class   #
 #############################
+
 
 class BasePacketList(Gen[_T]):
     __slots__ = []  # type: List[str]
@@ -528,7 +547,8 @@ class _CanvasDumpExtended(object):
         :param filename: the file's filename
         """
         from scapy.config import conf
-        from scapy.utils import get_temp_file, ContextManagerSubprocess
+        from scapy.utils import ContextManagerSubprocess, get_temp_file
+
         canvas = self.canvas_dump(**kargs)
         if filename is None:
             fname = get_temp_file(autoext=kargs.get("suffix", ".eps"))
@@ -553,7 +573,8 @@ class _CanvasDumpExtended(object):
         :param filename: the file's filename
         """
         from scapy.config import conf
-        from scapy.utils import get_temp_file, ContextManagerSubprocess
+        from scapy.utils import ContextManagerSubprocess, get_temp_file
+
         canvas = self.canvas_dump(**kargs)
         if filename is None:
             fname = get_temp_file(autoext=kargs.get("suffix", ".pdf"))
@@ -578,7 +599,8 @@ class _CanvasDumpExtended(object):
         :param filename: the file's filename
         """
         from scapy.config import conf
-        from scapy.utils import get_temp_file, ContextManagerSubprocess
+        from scapy.utils import ContextManagerSubprocess, get_temp_file
+
         canvas = self.canvas_dump(**kargs)
         if filename is None:
             fname = get_temp_file(autoext=kargs.get("suffix", ".svg"))
