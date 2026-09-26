@@ -193,3 +193,18 @@ texinfo_documents = [
      '',
      'Miscellaneous'),
 ]
+
+# -- Warning suppression ------------------------------------------------
+
+import warnings
+# Suppress cryptography deprecation warnings during documentation build
+try:
+    from cryptography.utils import CryptographyDeprecationWarning
+    warnings.filterwarnings("ignore", category=CryptographyDeprecationWarning)
+except ImportError:
+    pass
+
+# Suppress specific Sphinx warnings (e.g. ambiguous cross-references)
+suppress_warnings = [
+    'ref.ambiguous',
+]
