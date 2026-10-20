@@ -718,7 +718,7 @@ class Dot11(Packet):
                 )
             ],
             FlagsField("FCfield", 0, 8,
-                       ["to_DS", "from_DS", "MF", "retry",
+                       ["to-DS", "from-DS", "MF", "retry",
                         "pw_mgt", "MD", "protected", "order"])
         ),
         ConditionalField(
