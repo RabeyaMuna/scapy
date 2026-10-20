@@ -360,7 +360,9 @@ class ServerDHParams(_GenericTLSSessionInheritance):
 
         p = pkcs_os2ip(self.dh_p)
         g = pkcs_os2ip(self.dh_g)
-        real_params = dh.DHParameterNumbers(p, g).parameters(default_backend())
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", CryptographyDeprecationWarning)
+            real_params = dh.DHParameterNumbers(p, g).parameters(default_backend())
 
         if not self.dh_Ys:
             s.server_kx_privkey = real_params.generate_private_key()
@@ -381,17 +383,19 @@ class ServerDHParams(_GenericTLSSessionInheritance):
         """
         p = pkcs_os2ip(self.dh_p)
         g = pkcs_os2ip(self.dh_g)
-        pn = dh.DHParameterNumbers(p, g)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", CryptographyDeprecationWarning)
+            pn = dh.DHParameterNumbers(p, g)
 
-        y = pkcs_os2ip(self.dh_Ys)
-        public_numbers = dh.DHPublicNumbers(y, pn)
+            y = pkcs_os2ip(self.dh_Ys)
+            public_numbers = dh.DHPublicNumbers(y, pn)
 
-        s = self.tls_session
-        s.server_kx_pubkey = public_numbers.public_key(default_backend())
-        s.kx_group = "ffdhe%s" % (self.dh_plen * 8)
+            s = self.tls_session
+            s.server_kx_pubkey = public_numbers.public_key(default_backend())
+            s.kx_group = "ffdhe%s" % (self.dh_plen * 8)
 
-        if not s.client_kx_ffdh_params:
-            s.client_kx_ffdh_params = pn.parameters(default_backend())
+            if not s.client_kx_ffdh_params:
+                s.client_kx_ffdh_params = pn.parameters(default_backend())
 
     def post_dissection(self, r):
         try:
@@ -795,8 +799,10 @@ class ClientDiffieHellmanPublic(_GenericTLSSessionInheritance):
         if s.client_kx_ffdh_params:
             y = pkcs_os2ip(self.dh_Yc)
             param_numbers = s.client_kx_ffdh_params.parameter_numbers()
-            public_numbers = dh.DHPublicNumbers(y, param_numbers)
-            s.client_kx_pubkey = public_numbers.public_key(default_backend())
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", CryptographyDeprecationWarning)
+                public_numbers = dh.DHPublicNumbers(y, param_numbers)
+                s.client_kx_pubkey = public_numbers.public_key(default_backend())
 
         if s.server_kx_privkey and s.client_kx_pubkey:
             ZZ = s.server_kx_privkey.exchange(s.client_kx_pubkey)

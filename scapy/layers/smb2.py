@@ -1510,7 +1510,9 @@ class WINNT_ACL(Packet):
             None,
             length_of="Aces",
             adjust=lambda _, x: x + 8,
-            fmt="<H",  # total size including header : AclRevision(1) + Sbz1(1) + AclSize(2) + AceCount(2) + Sbz2(2)
+            # total size including header : AclRevision(1) + Sbz1(1)
+            # + AclSize(2) + AceCount(2) + Sbz2(2)
+            fmt="<H",
         ),
         FieldLenField("AceCount", None, count_of="Aces", fmt="<H"),
         ShortField("Sbz2", 0),
@@ -4370,7 +4372,7 @@ bind_top_down(
 
 
 class SMB2_Set_Info_Response(_SMB2_Payload):
-    name = "SMB2 SET INFO Request"
+    name = "SMB2 SET INFO Response"
     Command = 0x0011
     fields_desc = [
         XLEShortField("StructureSize", 0x02),

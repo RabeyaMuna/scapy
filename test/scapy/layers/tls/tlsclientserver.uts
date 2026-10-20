@@ -42,6 +42,14 @@ def captured_output():
 def check_output_for_data(out, err, expected_data):
     errored = err.s.strip()
     if errored:
+        # Filter out deprecation warnings (e.g. CryptographyDeprecationWarning)
+        # that are emitted on stderr but do not indicate a real failure.
+        errored_lines = [
+            line for line in errored.splitlines()
+            if line.strip() and "Warning" not in line
+        ]
+        errored = "\n".join(errored_lines).strip()
+    if errored:
         return (False, errored)
     output = out.s.strip()
     if expected_data:

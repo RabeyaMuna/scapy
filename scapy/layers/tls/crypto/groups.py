@@ -453,7 +453,9 @@ def _tls_named_groups_import(group, pubbytes):
 def _tls_named_groups_pubbytes(privkey):
     if isinstance(privkey, dh.DHPrivateKey):
         # https://datatracker.ietf.org/doc/html/rfc8446#section-4.2.8.1
-        pubkey = privkey.public_key()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", CryptographyDeprecationWarning)
+            pubkey = privkey.public_key()
         return int_bytes(pubkey.public_numbers().y, privkey.key_size // 8)
     elif isinstance(privkey, (x25519.X25519PrivateKey,
                               x448.X448PrivateKey)):
