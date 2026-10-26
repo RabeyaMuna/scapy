@@ -2116,7 +2116,7 @@ iwconfig wlan0 mode managed
         tcp = p.getlayer(TCP)
         pay = raw(tcp.payload)
         p[IP].underlayer.remove_payload()
-        p.FCfield = "from-DS"
+        p.FCfield = "from_DS"
         p.addr1, p.addr2 = p.addr2, p.addr1
         p /= IP(src=ip.dst, dst=ip.src)
         p /= TCP(sport=tcp.dport, dport=tcp.sport,
