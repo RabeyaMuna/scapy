@@ -164,6 +164,9 @@ class ObjectPipe(Generic[_T]):
         self.__rd, self.__wr = os.pipe()
         self.__queue = deque()  # type: Deque[_T]
         if WINDOWS:
+            # Keep the queue and its manual-reset event in sync when a sender
+            # races with the receiver consuming the last queued object.
+            self.__queue_lock = threading.Lock()
             self._wincreate()
 
     if WINDOWS:
@@ -197,9 +200,12 @@ class ObjectPipe(Generic[_T]):
 
     def send(self, obj):
         # type: (_T) -> int
-        self.__queue.append(obj)
         if WINDOWS:
-            self._winset()
+            with self.__queue_lock:
+                self.__queue.append(obj)
+                self._winset()
+        else:
+            self.__queue.append(obj)
         os.write(self.__wr, b"X")
         return 1
 
@@ -224,9 +230,13 @@ class ObjectPipe(Generic[_T]):
                 return self.__queue[0]
             return None
         os.read(self.__rd, 1)
-        elt = self.__queue.popleft()
-        if WINDOWS and not self.__queue:
-            self._winreset()
+        if WINDOWS:
+            with self.__queue_lock:
+                elt = self.__queue.popleft()
+                if not self.__queue:
+                    self._winreset()
+        else:
+            elt = self.__queue.popleft()
         return elt
 
     def read(self, n=0):

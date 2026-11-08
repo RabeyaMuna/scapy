@@ -32,6 +32,15 @@ if conf.crypto_valid:
         )
     except ImportError:
         decrepit_algorithms = algorithms
+    try:
+        _Camellia = decrepit_algorithms.Camellia
+    except AttributeError:
+        # Camellia moved to decrepit_algorithms after TripleDES, IDEA, etc.
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", category=CryptographyDeprecationWarning
+            )
+            _Camellia = algorithms.Camellia
 
 
 _tls_block_cipher_algs = {}
@@ -134,7 +143,7 @@ if conf.crypto_valid:
         key_len = 32
 
     class Cipher_CAMELLIA_128_CBC(_BlockCipher):
-        pc_cls = algorithms.Camellia
+        pc_cls = _Camellia
         pc_cls_mode = modes.CBC
         block_size = 16
         key_len = 16

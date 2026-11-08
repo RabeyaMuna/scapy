@@ -20,6 +20,51 @@ assert select_objects([ObjectPipe()], 1) == []
 a = ObjectPipe()
 a.send("test")
 assert select_objects([a], 0) == [a]
+a.close()
+
+= Automaton - ObjectPipe concurrent send and reset
+
+from threading import Event, Thread
+
+a = ObjectPipe()
+original_reset = a._winreset
+reset_started = Event()
+allow_reset = Event()
+sender_finished = Event()
+received = []
+
+def controlled_reset():
+    reset_started.set()
+    allow_reset.wait(timeout=1)
+    original_reset()
+
+def receive_first():
+    received.append(a.recv())
+
+def send_second():
+    a.send("second")
+    sender_finished.set()
+
+a._winreset = controlled_reset
+a.send("first")
+receiver = Thread(target=receive_first)
+receiver.start()
+assert reset_started.wait(timeout=1)
+sender = Thread(target=send_second)
+sender.start()
+# The sender must remain blocked while the receiver resets the event. Keep
+# this in an assertion: UTscapy treats a bare False expression as a failure.
+assert not sender_finished.wait(timeout=0.1)
+allow_reset.set()
+receiver.join(timeout=1)
+sender.join(timeout=1)
+
+assert received == ["first"]
+assert not receiver.is_alive()
+assert not sender.is_alive()
+assert select_objects([a], 1) == [a]
+assert a.recv() == "second"
+a.close()
 
 ############
 ############

@@ -46,6 +46,13 @@ autodoc_inherit_docstrings = False
 autodoc_default_options = {
     'undoc-members': True
 }
+# Sphinx 9 turns legacy ``# type:`` comments into cross-references. Common
+# annotations such as ``type`` then collide with documented packet attributes.
+autodoc_use_type_comments = False
+# Scapy's autodoc extension customizes the class-based AttributeDocumenter.
+# Sphinx 9 uses a new autodoc implementation by default, so retain the legacy
+# implementation until the extension is ported to the new API.
+autodoc_use_legacy_class_based = True
 
 # Enable the todo module
 todo_include_todos = True
@@ -74,6 +81,12 @@ copyright = '2008-%s Philippe Biondi and the Scapy community' % year
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 from scapy import VERSION, VERSION_MAIN
+from scapy.error import log_runtime
+
+# Importing a few contrib modules intentionally emits runtime warnings. They
+# should not make an autodoc build using ``-W`` fail.
+log_runtime.setLevel("ERROR")
+
 # The short X.Y version.
 release = VERSION_MAIN
 # The full version, including alpha/beta/rc tags.

@@ -612,7 +612,10 @@ udsmsgs = sniff(offline=scapy_path("test/pcaps/ecu_trace.pcap.gz"),
 
 assert len(udsmsgs) == 50
 
-ecu = Ecu()
+# Avoid rendering every packet on PyPy: besides being incidental to this
+# test, it can trigger a JIT internal exception there. Keep the default on
+# CPython, where the representation is part of the exercised code path.
+ecu = Ecu(verbose=not conf.use_pypy)
 ecu.update(udsmsgs)
 response = ecu.supported_responses[0]
 assert response.supports_state(EcuState())
@@ -635,7 +638,7 @@ assert len(ecu.log["TransferData"]) == 2
 
 = Analyze on the fly with EcuSession
 
-session = EcuSession()
+session = EcuSession(verbose=not conf.use_pypy)
 
 with PcapReader(scapy_path("test/pcaps/ecu_trace.pcap.gz")) as sock:
      udsmsgs = sniff(session=ISOTPSession(supersession=session, use_ext_address=False, basecls=UDS), count=50, opened_socket=sock, timeout=3)

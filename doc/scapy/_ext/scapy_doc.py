@@ -143,13 +143,21 @@ def builder_inited_handler(app):
         subprocess.call(['tox', '-e', 'apitree'])
 
 
+def config_inited_handler(app, config):
+    """Register Scapy's documenter after Sphinx's autodoc documenters."""
+    app.add_autodocumenter(AttrsDocumenter, override=True)
+
+
 def setup(app):
     """
     Entry point of the scapy_doc extension.
 
     Called by sphinx while booting up.
     """
-    app.add_autodocumenter(AttrsDocumenter, override=True)
+    # Sphinx 9 registers its legacy class-based documenters on config-inited.
+    # Registering our override during extension setup would make Sphinx's later
+    # registration emit a duplicate-directive warning and replace our class.
+    app.connect('config-inited', config_inited_handler, priority=900)
     app.connect('builder-inited', builder_inited_handler)
 
     # Dummy. We won't publish this
