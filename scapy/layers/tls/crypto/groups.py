@@ -18,11 +18,15 @@ from scapy.config import conf
 from scapy.compat import bytes_int, int_bytes
 from scapy.error import warning
 from scapy.utils import long_converter
+import warnings
 if conf.crypto_valid:
+    from cryptography.utils import CryptographyDeprecationWarning
     from cryptography.hazmat.backends import default_backend
     from cryptography.hazmat.primitives.asymmetric import dh, ec
     from cryptography.hazmat.primitives import serialization
-    from cryptography.hazmat.primitives.asymmetric.dh import DHParameterNumbers
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", CryptographyDeprecationWarning)
+        from cryptography.hazmat.primitives.asymmetric.dh import DHParameterNumbers
 if conf.crypto_valid_advanced:
     from cryptography.hazmat.primitives.asymmetric import x25519
     from cryptography.hazmat.primitives.asymmetric import x448

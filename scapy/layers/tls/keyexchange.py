@@ -11,6 +11,7 @@ TLS key exchange logic.
 
 import math
 import struct
+import warnings
 
 from scapy.config import conf, crypto_validator
 from scapy.error import warning
@@ -33,6 +34,7 @@ from scapy.layers.tls.crypto.groups import (
 
 
 if conf.crypto_valid:
+    from cryptography.utils import CryptographyDeprecationWarning
     from cryptography.hazmat.backends import default_backend
     from cryptography.hazmat.primitives.asymmetric import dh, ec
     from cryptography.hazmat.primitives import serialization
@@ -342,56 +344,60 @@ class ServerDHParams(_GenericTLSSessionInheritance):
 
         Note that we do not expect default_params.g to be more than 0xff.
         """
-        s = self.tls_session
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", CryptographyDeprecationWarning)
+            s = self.tls_session
 
-        default_params = _ffdh_groups['modp2048'][0].parameter_numbers()
-        default_mLen = _ffdh_groups['modp2048'][1]
+            default_params = _ffdh_groups['modp2048'][0].parameter_numbers()
+            default_mLen = _ffdh_groups['modp2048'][1]
 
-        if not self.dh_p:
-            self.dh_p = pkcs_i2osp(default_params.p, default_mLen // 8)
-        if self.dh_plen is None:
-            self.dh_plen = len(self.dh_p)
-        s.kx_group = "ffdhe%s" % (self.dh_plen * 8)
+            if not self.dh_p:
+                self.dh_p = pkcs_i2osp(default_params.p, default_mLen // 8)
+            if self.dh_plen is None:
+                self.dh_plen = len(self.dh_p)
+            s.kx_group = "ffdhe%s" % (self.dh_plen * 8)
 
-        if not self.dh_g:
-            self.dh_g = pkcs_i2osp(default_params.g, 1)
-        if self.dh_glen is None:
-            self.dh_glen = 1
+            if not self.dh_g:
+                self.dh_g = pkcs_i2osp(default_params.g, 1)
+            if self.dh_glen is None:
+                self.dh_glen = 1
 
-        p = pkcs_os2ip(self.dh_p)
-        g = pkcs_os2ip(self.dh_g)
-        real_params = dh.DHParameterNumbers(p, g).parameters(default_backend())
+            p = pkcs_os2ip(self.dh_p)
+            g = pkcs_os2ip(self.dh_g)
+            real_params = dh.DHParameterNumbers(p, g).parameters(default_backend())
 
-        if not self.dh_Ys:
-            s.server_kx_privkey = real_params.generate_private_key()
-            pubkey = s.server_kx_privkey.public_key()
-            y = pubkey.public_numbers().y
-            self.dh_Ys = pkcs_i2osp(y, pubkey.key_size // 8)
-        # else, we assume that the user wrote the server_kx_privkey by himself
-        if self.dh_Yslen is None:
-            self.dh_Yslen = len(self.dh_Ys)
+            if not self.dh_Ys:
+                s.server_kx_privkey = real_params.generate_private_key()
+                pubkey = s.server_kx_privkey.public_key()
+                y = pubkey.public_numbers().y
+                self.dh_Ys = pkcs_i2osp(y, pubkey.key_size // 8)
+            # else, we assume that the user wrote the server_kx_privkey by himself
+            if self.dh_Yslen is None:
+                self.dh_Yslen = len(self.dh_Ys)
 
-        if not s.client_kx_ffdh_params:
-            s.client_kx_ffdh_params = real_params
+            if not s.client_kx_ffdh_params:
+                s.client_kx_ffdh_params = real_params
 
     @crypto_validator
     def register_pubkey(self):
         """
         XXX Check that the pubkey received is in the group.
         """
-        p = pkcs_os2ip(self.dh_p)
-        g = pkcs_os2ip(self.dh_g)
-        pn = dh.DHParameterNumbers(p, g)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", CryptographyDeprecationWarning)
+            p = pkcs_os2ip(self.dh_p)
+            g = pkcs_os2ip(self.dh_g)
+            pn = dh.DHParameterNumbers(p, g)
 
-        y = pkcs_os2ip(self.dh_Ys)
-        public_numbers = dh.DHPublicNumbers(y, pn)
+            y = pkcs_os2ip(self.dh_Ys)
+            public_numbers = dh.DHPublicNumbers(y, pn)
 
-        s = self.tls_session
-        s.server_kx_pubkey = public_numbers.public_key(default_backend())
-        s.kx_group = "ffdhe%s" % (self.dh_plen * 8)
+            s = self.tls_session
+            s.server_kx_pubkey = public_numbers.public_key(default_backend())
+            s.kx_group = "ffdhe%s" % (self.dh_plen * 8)
 
-        if not s.client_kx_ffdh_params:
-            s.client_kx_ffdh_params = pn.parameters(default_backend())
+            if not s.client_kx_ffdh_params:
+                s.client_kx_ffdh_params = pn.parameters(default_backend())
 
     def post_dissection(self, r):
         try:
@@ -795,8 +801,10 @@ class ClientDiffieHellmanPublic(_GenericTLSSessionInheritance):
         if s.client_kx_ffdh_params:
             y = pkcs_os2ip(self.dh_Yc)
             param_numbers = s.client_kx_ffdh_params.parameter_numbers()
-            public_numbers = dh.DHPublicNumbers(y, param_numbers)
-            s.client_kx_pubkey = public_numbers.public_key(default_backend())
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", CryptographyDeprecationWarning)
+                public_numbers = dh.DHPublicNumbers(y, param_numbers)
+                s.client_kx_pubkey = public_numbers.public_key(default_backend())
 
         if s.server_kx_privkey and s.client_kx_pubkey:
             ZZ = s.server_kx_privkey.exchange(s.client_kx_pubkey)
