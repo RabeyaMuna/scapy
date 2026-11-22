@@ -251,7 +251,8 @@ from unittest import mock
 @mock.patch("scapy.layers.dot11.sniff")
 def test_WiFi_am(packet_query, check_reply, mock_sniff, **kargs):
     def sniff(*args,**kargs):
-        kargs["prn"](packet_query)
+        if "prn" in kargs:
+            kargs["prn"](packet_query)
     mock_sniff.side_effect = sniff
     am = WiFi_am(**kargs)
     am.send_reply = check_reply
